@@ -1,4 +1,4 @@
-# FRACTALS: Fractal Randomness for Aggregate Compression, Tokenizer Alternative Looping through Seeds
+# FRACTALS: Fractal Randomness for Aggregate Compression; a Tokenizer Alternative Looping over Seeds
 
 Mike Bybee, Science/Art/Magic
 

@@ -19,7 +19,7 @@ class Emoji:
 
 
 def encode(text: str, norm_form: Form = None, emoji: Emoji = Emoji.emojize):
-    text = text.strip()
+    # text = text.strip()
     if emoji == Emoji.emojize:
         text = emojize(text)
     else:
@@ -35,7 +35,7 @@ def encode(text: str, norm_form: Form = None, emoji: Emoji = Emoji.emojize):
                 if len(char)
             ]
             for word in line.split(" ")
-            if len(word)
+            # if len(word)
         ]
         # to preserve lines with "/n" only, do not filter at line level
         for line in text.splitlines()
@@ -45,7 +45,9 @@ def encode(text: str, norm_form: Form = None, emoji: Emoji = Emoji.emojize):
 def decode(encoded, norm_form: Form = None, emoji: Emoji = Emoji.demojize):
     decoded = linesep.join(
         " ".join(
-            "".join(bytes(char).decode("utf-8") for char in word) if len(word) else "\n"
+            "".join(
+                bytes(char).decode("utf-8") for char in word
+            )  # if len(word) else "\n"
             for word in line
         )
         for line in encoded

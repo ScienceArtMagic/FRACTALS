@@ -1,5 +1,5 @@
 from iteration_utilities import deepflatten
-from fractals.text import Emoji, Form, decode, encode
+from fractals.text import EMOJI, CODE, NFC, NFD, decode, encode
 
 emojis = """
     :sparkles: feat: Now emoji-safe! ✅🔥:pile_of_poo:😊😂⭐💀🎉
@@ -17,8 +17,8 @@ Newlines also work!
 :smiling_face_with_horns::mushroom::sign_of_the_horns::broccoli:💨
 """
 
-enc_d = encode(emojis, Form.NFD, Emoji.demojize)
-enc_e = encode(emojis, Form.NFD, Emoji.emojize)
+enc_d = encode(emojis, NFD, "code")
+enc_e = encode(emojis, "NFKC", "emoji")
 
 print(
     enc_d,
@@ -33,14 +33,14 @@ print(
     "\n\n",
 )
 print(
-    decode(enc_e, None, Emoji.demojize),
+    decode(enc_e, None, CODE),
     "\nDecoded chars (demojized):",
-    len(decode(enc_e, None, Emoji.demojize)),
+    len(decode(enc_e, None, "code")),
     "\n\n",
 )
 print(
-    decode(enc_d, Form.NFC, Emoji.emojize),
+    decode(enc_d, NFC, EMOJI),
     "\nDecoded chars (emojized):",
-    len(decode(enc_d, Form.NFC, Emoji.emojize)),
+    len(decode(enc_d, NFC, EMOJI)),
     "\n\n",
 )

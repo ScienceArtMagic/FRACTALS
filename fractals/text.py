@@ -1,32 +1,22 @@
 from os import linesep
-from dataclasses import dataclass
-from unicodedata import normalize
-from emoji import demojize, emojize, is_emoji
+
+from .utils.utf8 import (
+    CODE,
+    EMOJI,
+    EmojiForm,
+    emoji_fn,
+    NFC,
+    NFD,
+    NFKC,
+    NFKD,
+    UTF8Form,
+    utf8_norm_fn,
+)
 
 
-@dataclass
-class Form:
-    NFC: str = "NFC"
-    NFD: str = "NFD"
-    NFKC: str = "NFKC"
-    NFKD: str = "NFKD"
-
-
-@dataclass
-class Emoji:
-    emojize: str = "emojize"
-    demojize: str = "demojize"
-
-
-def encode(text: str, norm_form: Form = None, emoji: Emoji = Emoji.emojize):
-    # text = text.strip()
-    if emoji == Emoji.emojize:
-        text = emojize(text)
-    else:
-        if emoji == Emoji.demojize:
-            text = demojize(text)
-    if isinstance(norm_form, Form):
-        text = normalize(norm_form, text)
+def encode(text: str, utf8_form: UTF8Form = None, emoji_form: EmojiForm = EMOJI):
+    # text = text.strip() ### disable to allow (multiple) preceding spaces (e.g. in code)
+    text = utf8_norm_fn(emoji_fn(text, emoji_form), utf8_form)
     return [
         [
             [
@@ -35,29 +25,20 @@ def encode(text: str, norm_form: Form = None, emoji: Emoji = Emoji.emojize):
                 if len(char)
             ]
             for word in line.split(" ")
-            # if len(word)
         ]
-        # to preserve lines with "/n" only, do not filter at line level
         for line in text.splitlines()
     ]
 
 
-def decode(encoded, norm_form: Form = None, emoji: Emoji = Emoji.demojize):
+def decode(
+    encoded,
+    utf8_form: UTF8Form = None,
+    emoji_form: EmojiForm = CODE,
+):
     decoded = linesep.join(
-        " ".join(
-            "".join(
-                bytes(char).decode("utf-8") for char in word
-            )  # if len(word) else "\n"
-            for word in line
-        )
+        " ".join("".join(bytes(char).decode("utf-8") for char in word) for word in line)
         for line in encoded
     )
-    # return normalize("NFC", demojize(bytes(list(chain(*encoded))).decode()))
-    if isinstance(norm_form, Form):
-        decoded = normalize(norm_form, decoded)
-    if emoji == Emoji.emojize:
-        decoded = emojize(decoded)
-    else:
-        if emoji == Emoji.demojize:
-            decoded = demojize(decoded)
+    decoded = utf8_norm_fn(decoded, utf8_form)
+    decoded = emoji_fn(decoded, emoji_form)
     return decoded

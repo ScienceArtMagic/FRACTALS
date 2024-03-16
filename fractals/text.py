@@ -15,6 +15,16 @@ from .utils.utf8 import (
 
 
 def encode(text: str, utf8_form: UTF8Form = None, emoji_form: EmojiForm = EMOJI):
+    """
+    Encode text into 8-bit integers based on UTF-8.
+
+    @param text - The text to encode. Must be a unicode string (including emoji).
+    @param utf8_form - The form in which normalize the text (pre-encoding).
+    @param emoji_form - Convert all emoji codes to emoji, or vice versa (pre-encoding, no conversion if set to None).
+
+    @return List of nested lists of uint8 split by newlines, then spaces, then individual characters, then individual bytes.
+        Multi-byte characters are grouped, single-byte represented as scalars.
+    """
     # text = text.strip() ### disable to allow (multiple) preceding spaces (e.g. in code)
     text = utf8_norm_fn(emoji_fn(text, emoji_form), utf8_form)
     return [
@@ -22,6 +32,8 @@ def encode(text: str, utf8_form: UTF8Form = None, emoji_form: EmojiForm = EMOJI)
             [
                 list(bytearray(char, "utf-8"))  # if ord(char) > 255 else [ord(char)]
                 for char in word.strip("")
+                # list containing an empty list 1 level below for repeated spaces,
+                # empty list 2 levels below for repeated newlines
                 if len(char)
             ]
             for word in line.split(" ")
@@ -35,6 +47,15 @@ def decode(
     utf8_form: UTF8Form = None,
     emoji_form: EmojiForm = CODE,
 ):
+    """
+    Decode/reassemble text into 8-bit integers based on UTF-8.
+
+    @param encoded - List of nested lists of uint8 to be decoded to text.
+    @param utf8_form - The form in which normalize the text (post-encoding).
+    @param emoji_form - Convert all emoji codes to emoji, or vice versa (post-encoding, no conversion if set to None).
+
+    @return The decoded (possibly normalized and/or emojized/demojized) text.
+    """
     decoded = linesep.join(
         " ".join("".join(bytes(char).decode("utf-8") for char in word) for word in line)
         for line in encoded
